@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const contactSchema = z.object({
+<<<<<<< Updated upstream
   name: z.string()
     .min(2, "Full name is required")
     .max(50, "Name is too long")
@@ -24,6 +25,13 @@ const contactSchema = z.object({
     .regex(/^[6-9][0-9]{9}$/, "Must be a valid 10-digit number starting with 6, 7, 8, or 9"),
   subject: z.string()
     .min(2, "Subject is required"),
+=======
+  name: z.string().min(2, "Full name is required").max(50, "Name is too long").regex(/^[A-Za-z\s_]+$/, "Name can only contain alphabets, spaces, and underscores"),
+  clientType: z.string().default("Individual"),
+  company: z.string().regex(/^[A-Za-z\s_]*$/, "Organisation can only contain alphabets, spaces, and underscores").max(100, "Company name is too long").optional(),
+  phone: z.string().regex(/^[6-9]\d{9}$/, "Must be 10 digits and start with 6, 7, 8, or 9"),
+  subject: z.string().min(2, "Subject is required"),
+>>>>>>> Stashed changes
 });
 
 const inquiryOptions = [
@@ -66,10 +74,16 @@ export function Hero({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
+    defaultValues: {
+      clientType: "Individual",
+    }
   });
+
+  const clientType = watch("clientType");
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("loading");
@@ -86,8 +100,9 @@ export function Hero({
           subject: `Home Page Inquiry from ${data.name}`,
           from_name: "LMB Website Portal",
           "Visitor Name": data.name,
+          "Client Type": data.clientType,
           "Phone Number": `+91 ${data.phone}`,
-          "Company Name": data.company || "Not provided",
+          "Company Name": data.clientType === "Organization" ? (data.company || "Not provided") : "N/A",
           "Inquiry Type": data.subject,
         }),
       });
@@ -381,13 +396,22 @@ export function Hero({
                           placeholder="e.g., John Doe"
                           maxLength={50}
                           {...register("name")}
+<<<<<<< Updated upstream
                           onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-ZÀ-ÿ\s'-]/g, ''); }}
+=======
+                          onKeyPress={(e) => {
+                            if (!/^[A-Za-z\s_]$/.test(e.key)) {
+                              e.preventDefault();
+                            }
+                          }}
+>>>>>>> Stashed changes
                           className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
                         />
                         {errors.name && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.name.message}</p>}
                       </div>
                       
                       <div>
+<<<<<<< Updated upstream
                         <label htmlFor="company" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Organisation</label>
                         <input 
                           id="company" 
@@ -398,7 +422,47 @@ export function Hero({
                           className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.company ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
                         />
                         {errors.company && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.company.message}</p>}
+=======
+                        <label htmlFor="clientType" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Are you an</label>
+                        <div className="relative">
+                          <select 
+                            id="clientType"
+                            {...register("clientType")}
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-[13px] text-[#334155] focus:outline-none focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9] transition-all appearance-none cursor-pointer pr-10"
+                          >
+                            <option value="Individual">Individual</option>
+                            <option value="Organization">Organization</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none" />
+                        </div>
+>>>>>>> Stashed changes
                       </div>
+
+                      <AnimatePresence>
+                        {clientType === "Organization" && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                            animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <label htmlFor="company" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Organisation Name</label>
+                            <input 
+                              id="company" 
+                              placeholder="e.g., Acme Corp" 
+                              maxLength={100}
+                              {...register("company")}
+                              onKeyPress={(e) => {
+                                if (!/^[A-Za-z\s_]$/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.company ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
+                            />
+                            {errors.company && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.company.message}</p>}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
                       <div>
                         <label htmlFor="subject" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Inquiry Type</label>
@@ -438,7 +502,19 @@ export function Hero({
                             placeholder="10-digit mobile number" 
                             maxLength={10}
                             {...register("phone")}
+<<<<<<< Updated upstream
                             onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '').replace(/^[0-5]+/, ''); }}
+=======
+                            onKeyPress={(e) => {
+                              if (!/[0-9]/.test(e.key)) {
+                                e.preventDefault();
+                                return;
+                              }
+                              if (e.currentTarget.selectionStart === 0 && !/^[6-9]$/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+>>>>>>> Stashed changes
                             className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.phone ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
                           />
                         </div>

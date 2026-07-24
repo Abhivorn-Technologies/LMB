@@ -41,7 +41,7 @@ const HeaderMegaMenu = React.memo(({ link, isActive, setMobileOpen, footerNav }:
         {link.name}
         <Icons.ChevronDown size={14} className={`ml-1 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         {isActive ? (
-          <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#ffb800] max-lg:hidden" />
+          <span className="absolute bottom-0 left-0 h-[2px] bg-[#ffb800] max-lg:hidden transition-all duration-300 w-full group-hover/nav:w-0 group-hover/nav:left-1/2 group-hover:!w-full group-hover:!left-0" />
         ) : (
           <span className="absolute bottom-0 left-1/2 w-0 h-[2px] bg-[#ffb800] transition-all duration-300 group-hover:w-full group-hover:left-0 max-lg:hidden" />
         )}
@@ -223,7 +223,7 @@ const HeaderSimpleDropdown = React.memo(({ link, options, isActive, setMobileOpe
         {link.name}
         <Icons.ChevronDown size={14} className={`ml-1 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         {isActive ? (
-          <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#ffb800] max-lg:hidden" />
+          <span className="absolute bottom-0 left-0 h-[2px] bg-[#ffb800] max-lg:hidden transition-all duration-300 w-full group-hover/nav:w-0 group-hover/nav:left-1/2 group-hover:!w-full group-hover:!left-0" />
         ) : (
           <span className="absolute bottom-0 left-1/2 w-0 h-[2px] bg-[#ffb800] transition-all duration-300 group-hover:w-full group-hover:left-0 max-lg:hidden" />
         )}
@@ -342,7 +342,7 @@ export function Header({ footerNav, mainNav }: { footerNav?: any, mainNav?: any 
           </Link>
         </div>
 
-        <div data-lenis-prevent="true" className={`relative z-10 flex justify-end lg:justify-end flex-1 gap-1.5 lg:gap-2 xl:gap-3 2xl:gap-5 items-center max-lg:fixed max-lg:top-0 max-lg:z-[50] max-lg:bg-white max-lg:flex-col max-lg:justify-start max-lg:items-start max-lg:p-8 max-lg:pt-6 max-lg:h-[100dvh] max-lg:pb-28 max-lg:w-[85%] max-lg:sm:w-[360px] max-lg:shadow-[-20px_0_60px_rgba(0,0,0,0.2)] max-lg:transition-transform max-lg:duration-500 max-lg:ease-in-out max-lg:overflow-y-auto max-lg:overflow-x-hidden [&::-webkit-scrollbar]:hidden ${mobileOpen ? 'max-lg:right-0 max-lg:translate-x-0' : 'max-lg:-right-full max-lg:translate-x-full'}`}>
+        <div data-lenis-prevent="true" className={`group/nav relative z-10 flex justify-end lg:justify-end flex-1 gap-1.5 lg:gap-2 xl:gap-3 2xl:gap-5 items-center max-lg:fixed max-lg:top-0 max-lg:z-[50] max-lg:bg-white max-lg:flex-col max-lg:justify-start max-lg:items-start max-lg:p-8 max-lg:pt-6 max-lg:h-[100dvh] max-lg:pb-28 max-lg:w-[85%] max-lg:sm:w-[360px] max-lg:shadow-[-20px_0_60px_rgba(0,0,0,0.2)] max-lg:transition-transform max-lg:duration-500 max-lg:ease-in-out max-lg:overflow-y-auto max-lg:overflow-x-hidden [&::-webkit-scrollbar]:hidden ${mobileOpen ? 'max-lg:right-0 max-lg:translate-x-0' : 'max-lg:-right-full max-lg:translate-x-full'}`}>
           
           {/* Mobile Sidebar Header */}
           <div className="lg:hidden flex items-center justify-between w-full mb-4 pb-4 border-b border-slate-100">
@@ -398,7 +398,7 @@ export function Header({ footerNav, mainNav }: { footerNav?: any, mainNav?: any 
               >
                 {linkName}
                 {isActive ? (
-                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#ffb800] max-lg:hidden" />
+                  <span className="absolute bottom-0 left-0 h-[2px] bg-[#ffb800] max-lg:hidden transition-all duration-300 w-full group-hover/nav:w-0 group-hover/nav:left-1/2 group-hover:!w-full group-hover:!left-0" />
                 ) : (
                   <span className="absolute bottom-0 left-1/2 w-0 h-[2px] bg-[#ffb800] transition-all duration-300 group-hover:w-full group-hover:left-0 max-lg:hidden" />
                 )}
