@@ -204,7 +204,7 @@ const HeaderSimpleDropdown = React.memo(({ link, options, isActive, setMobileOpe
 
   return (
     <div 
-      className="relative lg:py-6 lg:-my-6"
+      className="relative"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -236,15 +236,15 @@ const HeaderSimpleDropdown = React.memo(({ link, options, isActive, setMobileOpe
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[220px] z-[60] max-lg:static max-lg:w-full max-lg:translate-x-0 max-lg:mt-0"
+            className="absolute left-1/2 -translate-x-1/2 top-full pt-4 w-[240px] z-[60] max-lg:static max-lg:w-full max-lg:translate-x-0 max-lg:pt-0"
           >
-            <div className="flex flex-col bg-white text-slate-800 rounded-xl border border-slate-200 overflow-hidden shadow-2xl max-lg:shadow-none max-lg:border-none max-lg:bg-transparent max-lg:pl-8">
+            <div className="flex flex-col bg-white text-slate-800 rounded-xl border border-slate-200 overflow-hidden shadow-2xl max-lg:shadow-none max-lg:border-none max-lg:bg-transparent max-lg:pl-8 py-1">
               {options.map((opt: any) => (
                 <Link
                   key={opt.path}
                   href={opt.path}
                   onClick={() => setMobileOpen(false)}
-                  className="px-4 py-3 text-[0.85rem] font-medium hover:bg-slate-50 hover:text-[#F57C00] transition-colors max-lg:text-[0.9rem] max-lg:py-2"
+                  className="px-4 py-1.5 text-[0.85rem] font-medium hover:bg-slate-50 hover:text-[#F57C00] transition-colors max-lg:text-[0.9rem] max-lg:py-2"
                 >
                   {opt.name}
                 </Link>
