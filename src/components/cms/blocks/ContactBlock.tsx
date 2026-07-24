@@ -1,4 +1,6 @@
-import React from 'react';
+"use client";
+
+import React, { useRef, useState } from 'react';
 import { Phone, Mail } from "lucide-react";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { TextReveal } from "@/components/motion/TextReveal";
@@ -6,6 +8,45 @@ import { ContactForm } from "@/components/sections/ContactForm";
 
 export function ContactBlock({ content }: { content: any }) {
   const { title = "Speak with our", highlightTitle = "advisory team.", subtitle = "Submit an inquiry below and our expert team will respond promptly during business hours.", contactsTitle = "Key Contacts", contacts = [] } = content || {};
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    
+    // Prevent dragging if the user is clicking on the scrollbar
+    const rect = scrollRef.current.getBoundingClientRect();
+    if (e.clientX >= rect.right - 20) return;
+
+    setIsDragging(true);
+    setStartY(e.pageY - scrollRef.current.offsetTop);
+    setScrollTop(scrollRef.current.scrollTop);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const y = e.pageY - scrollRef.current.offsetTop;
+    const walk = (y - startY) * 1.5; // Scroll speed multiplier
+    scrollRef.current.scrollTop = scrollTop - walk;
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    // Stop the wheel event from bubbling up to the window
+    // so that scrolling inside the list doesn't scroll the page
+    e.stopPropagation();
+  };
 
   return (
     <div className="bg-slate-50 selection:bg-[#115E59] selection:text-white pb-12 w-full">
@@ -37,7 +78,15 @@ export function ContactBlock({ content }: { content: any }) {
 
                   <div className="relative flex-1 overflow-hidden min-h-0">
                     <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#115E59] to-transparent z-20 pointer-events-none lg:hidden" />
-                    <div className="h-full overflow-y-auto overscroll-contain pr-4 pb-12 custom-scrollbar space-y-8 relative z-10">
+                    <div 
+                      ref={scrollRef}
+                      onMouseDown={handleMouseDown}
+                      onMouseLeave={handleMouseLeave}
+                      onMouseUp={handleMouseUp}
+                      onMouseMove={handleMouseMove}
+                      onWheel={handleWheel}
+                      className={`h-full overflow-y-auto overscroll-contain pr-4 pb-12 custom-scrollbar space-y-8 relative z-10 ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+                    >
                     {contacts.map((contact: any, idx: number) => {
                       if (!contact.name && !contact.phone && !contact.email) return null;
                       
@@ -56,7 +105,7 @@ export function ContactBlock({ content }: { content: any }) {
                         
                         <div className="space-y-3">
                           {contact.phone && (
-                            <a href={`tel:${contact.phone.replace(/\s+/g, '')}`} className="flex items-center gap-3 text-sm text-white/80 hover:text-white transition-colors">
+                            <a href={`tel:${contact.phone.replace(/\s+/g, '')}`} className={`flex items-center gap-3 text-sm text-white/80 hover:text-white transition-colors ${isDragging ? 'pointer-events-none' : ''}`}>
                               <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 border border-white/20 group-hover/contact:bg-white/20 transition-colors">
                                 <Phone className="h-4 w-4 text-white" />
                               </div>
@@ -64,7 +113,7 @@ export function ContactBlock({ content }: { content: any }) {
                             </a>
                           )}
                           {contact.email && (
-                            <a href={`mailto:${contact.email}`} className="flex items-center gap-3 text-sm text-white/80 hover:text-white transition-colors">
+                            <a href={`mailto:${contact.email}`} className={`flex items-center gap-3 text-sm text-white/80 hover:text-white transition-colors ${isDragging ? 'pointer-events-none' : ''}`}>
                               <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 border border-white/20 group-hover/contact:bg-white/20 transition-colors">
                                 <Mail className="h-4 w-4 text-white" />
                               </div>
