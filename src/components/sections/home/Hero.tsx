@@ -44,6 +44,7 @@ export function Hero({
   const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [wordIndex, setWordIndex] = useState(0);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [isClientTypeOpen, setIsClientTypeOpen] = useState(false);
   
   // Use CMS data or fallback to defaults if content is missing
   const words = content?.subtitleWords || ["tomorrow.", "today.", "future.", "business.", "legacy."];
@@ -396,13 +397,20 @@ export function Hero({
                         <div className="relative">
                           <select 
                             id="clientType"
-                            {...register("clientType")}
+                            onClick={() => setIsClientTypeOpen((prev) => !prev)}
+                            onBlur={() => setIsClientTypeOpen(false)}
+                            {...register("clientType", {
+                              onChange: (e) => {
+                                setIsClientTypeOpen(false);
+                                e.target.blur();
+                              }
+                            })}
                             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-[13px] text-[#334155] focus:outline-none focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9] transition-all appearance-none cursor-pointer pr-10"
                           >
                             <option value="Individual">Individual</option>
                             <option value="Organization">Organization</option>
                           </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none" />
+                          <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none transition-transform duration-200 ${isClientTypeOpen ? "rotate-180" : ""}`} />
                         </div>
                       </div>
 

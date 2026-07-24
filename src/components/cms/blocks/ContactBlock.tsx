@@ -37,8 +37,7 @@ export function ContactBlock({ content }: { content: any }) {
 
                   <div className="relative flex-1 overflow-hidden min-h-0">
                     <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#115E59] to-transparent z-20 pointer-events-none lg:hidden" />
-                    
-                    <div className="h-full overflow-y-auto pr-4 pb-12 custom-scrollbar space-y-8 relative z-10">
+                    <div className="h-full overflow-y-auto overscroll-contain pr-4 pb-12 custom-scrollbar space-y-8 relative z-10">
                     {contacts.map((contact: any, idx: number) => {
                       if (!contact.name && !contact.phone && !contact.email) return null;
                       
