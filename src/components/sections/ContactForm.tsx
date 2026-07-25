@@ -4,23 +4,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
-import { Loader2, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 const contactSchema = z.object({
-  name: z.string()
-    .min(2, "Full name is required")
-    .max(50, "Name is too long")
-    .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Only letters, spaces, hyphens, and apostrophes allowed"),
+  name: z.string().min(2, "Full name is required").max(50, "Name is too long"),
   email: z.string()
     .email("A valid email address is required")
     .max(100, "Email is too long"),
-  phone: z.string()
-    .regex(/^[6-9][0-9]{9}$/, "Must be a valid 10-digit number starting with 6, 7, 8, or 9"),
-  company: z.string()
-    .max(100, "Company name is too long")
-    .regex(/^[a-zA-ZÀ-ÿ\s&\-_]*$/, "Only letters, spaces, &, -, _ allowed")
-    .optional(),
+  phone: z.string().min(10, "A valid phone number is required").max(15, "Phone number is too long"),
+  company: z.string().max(100, "Company name is too long").optional(),
   inquiry: z.string().min(1, "Please select an inquiry subject"),
   message: z.string().max(1000, "Message cannot exceed 1000 characters").optional(),
 });
@@ -40,7 +33,6 @@ export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
   );
-  const [isSelectOpen, setIsSelectOpen] = useState(false);
 
   const {
     register,
@@ -79,6 +71,11 @@ export function ContactForm() {
       if (result.success) {
         setStatus("success");
         reset();
+        
+        // Open WhatsApp
+        const whatsappMsg = `New Contact Inquiry:\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry: ${data.inquiry}\nCompany: ${data.company || 'Not provided'}\nMessage: ${data.message || 'None'}`;
+        const whatsappUrl = `https://wa.me/919347067788?text=${encodeURIComponent(whatsappMsg)}`;
+        window.open(whatsappUrl, '_blank');
       } else {
         console.error("Web3Forms Error:", result);
         setStatus("error");
@@ -146,7 +143,9 @@ export function ContactForm() {
                     placeholder="Your name" 
                     maxLength={50}
                     {...register("name")} 
-                    onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-ZÀ-ÿ\s'-]/g, ''); }}
+                    onInput={(e) => { 
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\s\-'.]/gu, ''); 
+                    }}
                     className={`flex h-12 w-full rounded-xl border bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors ${errors.name ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
                   />
                   {errors.name && (
@@ -178,11 +177,9 @@ export function ContactForm() {
                   </label>
                   <input 
                     id="phone" 
-                    type="tel"
-                    placeholder="10-digit mobile number" 
-                    maxLength={10}
+                    placeholder="+91 ..." 
+                    maxLength={15}
                     {...register("phone")} 
-                    onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '').replace(/^[0-5]+/, ''); }}
                     className={`flex h-12 w-full rounded-xl border bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors ${errors.phone ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
                   />
                   {errors.phone && (
@@ -198,7 +195,6 @@ export function ContactForm() {
                     placeholder="Company name" 
                     maxLength={100}
                     {...register("company")} 
-                    onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-ZÀ-ÿ\s&\-_]/g, ''); }}
                     className="flex h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#115E59] focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors"
                   />
                 </div>
@@ -208,31 +204,21 @@ export function ContactForm() {
                 <label htmlFor="inquiry" className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-700">
                   Subject <span className="text-[#115E59]">*</span>
                 </label>
-                <div className="relative">
-                  <select 
-                    id="inquiry" 
-                    defaultValue="" 
-                    onClick={() => setIsSelectOpen((prev) => !prev)}
-                    onBlur={() => setIsSelectOpen(false)}
-                    {...register("inquiry", {
-                      onChange: (e) => {
-                        setIsSelectOpen(false);
-                        e.target.blur();
-                      }
-                    })}
-                    className={`appearance-none flex h-12 w-full rounded-xl border bg-slate-50 px-4 pr-10 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors cursor-pointer ${errors.inquiry ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
-                  >
-                    <option value="" disabled>
-                      How can we help you today?
+                <select 
+                  id="inquiry" 
+                  defaultValue="" 
+                  {...register("inquiry")}
+                  className={`flex h-12 w-full rounded-xl border bg-slate-50 px-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors ${errors.inquiry ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
+                >
+                  <option value="" disabled>
+                    How can we help you today?
+                  </option>
+                  {inquiryOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
                     </option>
-                    {inquiryOptions.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none transition-transform duration-200 ${isSelectOpen ? "rotate-180" : ""}`} />
-                </div>
+                  ))}
+                </select>
                 {errors.inquiry && (
                   <p className="text-xs font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={12}/> {errors.inquiry.message}</p>
                 )}

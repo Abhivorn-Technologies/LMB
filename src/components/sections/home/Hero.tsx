@@ -12,10 +12,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const contactSchema = z.object({
-  name: z.string().min(2, "Full name is required").max(50, "Name is too long").regex(/^[A-Za-z\s_]+$/, "Name can only contain alphabets, spaces, and underscores"),
-  clientType: z.string().default("Individual"),
-  company: z.string().regex(/^[A-Za-z\s_]*$/, "Organisation can only contain alphabets, spaces, and underscores").max(100, "Company name is too long").optional(),
-  phone: z.string().regex(/^[6-9]\d{9}$/, "Must be 10 digits and start with 6, 7, 8, or 9"),
+  name: z.string().min(2, "Full name is required").max(50, "Name is too long"),
+  company: z.string().max(100, "Company name is too long").optional(),
+  phone: z.string().regex(/^[0-9]{10}$/, "Valid 10-digit number required"),
   subject: z.string().min(2, "Subject is required"),
 });
 
@@ -43,8 +42,6 @@ export function Hero({
 }) {
   const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [wordIndex, setWordIndex] = useState(0);
-  const [isSelectOpen, setIsSelectOpen] = useState(false);
-  const [isClientTypeOpen, setIsClientTypeOpen] = useState(false);
   
   // Use CMS data or fallback to defaults if content is missing
   const words = content?.subtitleWords || ["tomorrow.", "today.", "future.", "business.", "legacy."];
@@ -60,16 +57,10 @@ export function Hero({
     register,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
-    defaultValues: {
-      clientType: "Individual",
-    }
   });
-
-  const clientType = watch("clientType");
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("loading");
@@ -86,9 +77,8 @@ export function Hero({
           subject: `Home Page Inquiry from ${data.name}`,
           from_name: "LMB Website Portal",
           "Visitor Name": data.name,
-          "Client Type": data.clientType,
           "Phone Number": `+91 ${data.phone}`,
-          "Company Name": data.clientType === "Organization" ? (data.company || "Not provided") : "N/A",
+          "Company Name": data.company || "Not provided",
           "Inquiry Type": data.subject,
         }),
       });
@@ -97,6 +87,11 @@ export function Hero({
       
       if (result.success) {
         setSubmitStatus("success");
+        
+        // Open WhatsApp
+        const whatsappMsg = `New Inquiry from Website:\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry: ${data.subject}\nCompany: ${data.company || 'Not provided'}`;
+        const whatsappUrl = `https://wa.me/919347067788?text=${encodeURIComponent(whatsappMsg)}`;
+        window.open(whatsappUrl, '_blank');
       } else {
         setSubmitStatus("error");
         setTimeout(() => setSubmitStatus("idle"), 5000);
@@ -382,10 +377,8 @@ export function Hero({
                           placeholder="e.g., John Doe"
                           maxLength={50}
                           {...register("name")}
-                          onKeyPress={(e) => {
-                            if (!/^[A-Za-z\s_]$/.test(e.key)) {
-                              e.preventDefault();
-                            }
+                          onInput={(e) => { 
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\s\-'.]/gu, ''); 
                           }}
                           className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
                         />
@@ -393,52 +386,16 @@ export function Hero({
                       </div>
                       
                       <div>
-                        <label htmlFor="clientType" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Are you an</label>
-                        <div className="relative">
-                          <select 
-                            id="clientType"
-                            onClick={() => setIsClientTypeOpen((prev) => !prev)}
-                            onBlur={() => setIsClientTypeOpen(false)}
-                            {...register("clientType", {
-                              onChange: (e) => {
-                                setIsClientTypeOpen(false);
-                                e.target.blur();
-                              }
-                            })}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-[13px] text-[#334155] focus:outline-none focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9] transition-all appearance-none cursor-pointer pr-10"
-                          >
-                            <option value="Individual">Individual</option>
-                            <option value="Organization">Organization</option>
-                          </select>
-                          <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none transition-transform duration-200 ${isClientTypeOpen ? "rotate-180" : ""}`} />
-                        </div>
+                        <label htmlFor="company" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Organisation</label>
+                        <input 
+                          id="company" 
+                          placeholder="e.g., Acme Corp (Optional)" 
+                          maxLength={100}
+                          {...register("company")}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.company ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
+                        />
+                        {errors.company && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.company.message}</p>}
                       </div>
-
-                      <AnimatePresence>
-                        {clientType === "Organization" && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                            animate={{ opacity: 1, height: "auto", marginTop: 16 }}
-                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                            className="overflow-hidden"
-                          >
-                            <label htmlFor="company" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Organisation Name</label>
-                            <input 
-                              id="company" 
-                              placeholder="e.g., Acme Corp" 
-                              maxLength={100}
-                              {...register("company")}
-                              onKeyPress={(e) => {
-                                if (!/^[A-Za-z\s_]$/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              }}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.company ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
-                            />
-                            {errors.company && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.company.message}</p>}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
 
                       <div>
                         <label htmlFor="subject" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Inquiry Type</label>
@@ -446,22 +403,15 @@ export function Hero({
                           <select 
                             id="subject"
                             defaultValue=""
-                            onClick={() => setIsSelectOpen((prev) => !prev)}
-                            onBlur={() => setIsSelectOpen(false)}
-                            {...register("subject", {
-                              onChange: (e) => {
-                                setIsSelectOpen(false);
-                                e.target.blur();
-                              }
-                            })}
-                            className={`appearance-none w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all cursor-pointer pr-10 ${errors.subject ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`}
+                            {...register("subject")}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all appearance-none cursor-pointer pr-10 ${errors.subject ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`}
                           >
                             <option value="" disabled>Select inquiry type</option>
                             {inquiryOptions.map((opt) => (
                               <option key={opt} value={opt}>{opt}</option>
                             ))}
                           </select>
-                          <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none transition-transform duration-200 ${isSelectOpen ? "rotate-180" : ""}`} />
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none" />
                         </div>
                         {errors.subject && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.subject.message}</p>}
                       </div>
@@ -474,19 +424,9 @@ export function Hero({
                           </div>
                           <input 
                             id="phone" 
-                            type="tel"
                             placeholder="10-digit mobile number" 
                             maxLength={10}
                             {...register("phone")}
-                            onKeyPress={(e) => {
-                              if (!/[0-9]/.test(e.key)) {
-                                e.preventDefault();
-                                return;
-                              }
-                              if (e.currentTarget.selectionStart === 0 && !/^[6-9]$/.test(e.key)) {
-                                e.preventDefault();
-                              }
-                            }}
                             className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.phone ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
                           />
                         </div>
