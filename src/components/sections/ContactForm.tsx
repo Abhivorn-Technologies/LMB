@@ -71,6 +71,11 @@ export function ContactForm() {
       if (result.success) {
         setStatus("success");
         reset();
+        
+        // Open WhatsApp
+        const whatsappMsg = `New Contact Inquiry:\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry: ${data.inquiry}\nCompany: ${data.company || 'Not provided'}\nMessage: ${data.message || 'None'}`;
+        const whatsappUrl = `https://wa.me/919347067788?text=${encodeURIComponent(whatsappMsg)}`;
+        window.open(whatsappUrl, '_blank');
       } else {
         console.error("Web3Forms Error:", result);
         setStatus("error");
@@ -138,6 +143,9 @@ export function ContactForm() {
                     placeholder="Your name" 
                     maxLength={50}
                     {...register("name")} 
+                    onInput={(e) => { 
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\s\-'.]/gu, ''); 
+                    }}
                     className={`flex h-12 w-full rounded-xl border bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors ${errors.name ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
                   />
                   {errors.name && (

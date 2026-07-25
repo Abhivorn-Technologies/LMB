@@ -87,6 +87,11 @@ export function Hero({
       
       if (result.success) {
         setSubmitStatus("success");
+        
+        // Open WhatsApp
+        const whatsappMsg = `New Inquiry from Website:\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry: ${data.subject}\nCompany: ${data.company || 'Not provided'}`;
+        const whatsappUrl = `https://wa.me/919347067788?text=${encodeURIComponent(whatsappMsg)}`;
+        window.open(whatsappUrl, '_blank');
       } else {
         setSubmitStatus("error");
         setTimeout(() => setSubmitStatus("idle"), 5000);
@@ -372,6 +377,9 @@ export function Hero({
                           placeholder="e.g., John Doe"
                           maxLength={50}
                           {...register("name")}
+                          onInput={(e) => { 
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\s\-'.]/gu, ''); 
+                          }}
                           className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
                         />
                         {errors.name && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.name.message}</p>}
