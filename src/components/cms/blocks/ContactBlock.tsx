@@ -7,7 +7,8 @@ import { TextReveal } from "@/components/motion/TextReveal";
 import { ContactForm } from "@/components/sections/ContactForm";
 
 export function ContactBlock({ content }: { content: any }) {
-  const { title = "Speak with our", highlightTitle = "advisory team.", subtitle = "Submit an inquiry below and our expert team will respond promptly during business hours.", contactsTitle = "Key Contacts", contacts = [] } = content || {};
+  let { title = "Speak with our", highlightTitle = "advisory team.", subtitle = "Submit an inquiry below and our expert team will respond promptly during business hours.", contactsTitle = "Key Contacts", contacts = [] } = content || {};
+  if (contactsTitle === "Key Contactss") contactsTitle = "Key Contacts";
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);

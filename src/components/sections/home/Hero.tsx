@@ -13,9 +13,20 @@ import { z } from "zod";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Full name is required").max(50, "Name is too long"),
-  company: z.string().max(100, "Company name is too long").optional(),
-  phone: z.string().regex(/^[0-9]{10}$/, "Valid 10-digit number required"),
+  company: z.enum(["Individual", "Organization"], {
+    errorMap: () => ({ message: "Please select an organisation type" })
+  }),
+  companyName: z.string().max(100, "Name is too long").optional(),
+  phone: z.string().regex(/^[6-9]\d{9}$/, "Valid 10-digit number starting with 6-9 required"),
   subject: z.string().min(2, "Subject is required"),
+}).superRefine((data, ctx) => {
+  if (data.company === "Organization" && !data.companyName?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Organization name is required",
+      path: ["companyName"]
+    });
+  }
 });
 
 const inquiryOptions = [
@@ -57,10 +68,13 @@ export function Hero({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
   });
+
+  const selectedCompanyType = watch("company");
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("loading");
@@ -78,7 +92,7 @@ export function Hero({
           from_name: "LMB Website Portal",
           "Visitor Name": data.name,
           "Phone Number": `+91 ${data.phone}`,
-          "Company Name": data.company || "Not provided",
+          "Company Name": data.company === "Organization" ? data.companyName : "Individual",
           "Inquiry Type": data.subject,
         }),
       });
@@ -89,7 +103,7 @@ export function Hero({
         setSubmitStatus("success");
         
         // Open WhatsApp
-        const whatsappMsg = `New Inquiry from Website:\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry: ${data.subject}\nCompany: ${data.company || 'Not provided'}`;
+        const whatsappMsg = `New Inquiry from Website:\nName: ${data.name}\nPhone: ${data.phone}\nInquiry: ${data.subject}\nCompany: ${data.company === "Organization" ? data.companyName : 'Individual'}`;
         const whatsappUrl = `https://wa.me/919347067788?text=${encodeURIComponent(whatsappMsg)}`;
         window.open(whatsappUrl, '_blank');
       } else {
@@ -386,16 +400,48 @@ export function Hero({
                       </div>
                       
                       <div>
-                        <label htmlFor="company" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Organisation</label>
-                        <input 
-                          id="company" 
-                          placeholder="e.g., Acme Corp (Optional)" 
-                          maxLength={100}
-                          {...register("company")}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.company ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
-                        />
+                        <label htmlFor="company" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Profile Type</label>
+                        <div className="relative">
+                          <select 
+                            id="company" 
+                            defaultValue=""
+                            {...register("company")}
+                            className={`peer w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all appearance-none cursor-pointer pr-10 ${errors.company ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
+                          >
+                            <option value="" disabled>Select organisation type</option>
+                            <option value="Individual">Individual</option>
+                            <option value="Organization">Organization</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none transition-transform peer-focus:-rotate-180 duration-300" />
+                        </div>
                         {errors.company && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.company.message}</p>}
                       </div>
+
+                      <AnimatePresence>
+                        {selectedCompanyType === "Organization" && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }} 
+                            animate={{ opacity: 1, height: "auto" }} 
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pt-4">
+                              <label htmlFor="companyName" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Name of Organization</label>
+                              <input 
+                                id="companyName" 
+                                placeholder="e.g., Acme Corp" 
+                                maxLength={100}
+                                {...register("companyName")}
+                                onInput={(e) => { 
+                                  e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\s&_]/gu, ''); 
+                                }}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.companyName ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
+                              />
+                              {errors.companyName && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.companyName.message}</p>}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
                       <div>
                         <label htmlFor="subject" className="block text-[11px] font-bold tracking-wider text-[#64748b] uppercase mb-1.5">Inquiry Type</label>
@@ -404,14 +450,14 @@ export function Hero({
                             id="subject"
                             defaultValue=""
                             {...register("subject")}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all appearance-none cursor-pointer pr-10 ${errors.subject ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`}
+                            className={`peer w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all appearance-none cursor-pointer pr-10 ${errors.subject ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`}
                           >
                             <option value="" disabled>Select inquiry type</option>
                             {inquiryOptions.map((opt) => (
                               <option key={opt} value={opt}>{opt}</option>
                             ))}
                           </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none" />
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8] pointer-events-none transition-transform peer-focus:-rotate-180 duration-300" />
                         </div>
                         {errors.subject && <p className="text-[10px] font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.subject.message}</p>}
                       </div>
@@ -427,6 +473,13 @@ export function Hero({
                             placeholder="10-digit mobile number" 
                             maxLength={10}
                             {...register("phone")}
+                            onInput={(e) => { 
+                              let val = e.currentTarget.value.replace(/\D/g, '');
+                              if (val.length > 0 && !/^[6-9]/.test(val[0])) {
+                                val = val.replace(/^[^6-9]+/, '');
+                              }
+                              e.currentTarget.value = val.substring(0,10); 
+                            }}
                             className={`w-full px-3.5 py-2.5 rounded-xl border bg-white text-[13px] text-[#334155] placeholder:text-[#94a3b8] focus:outline-none focus:ring-1 transition-all ${errors.phone ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-[#0ea5e9] focus:ring-[#0ea5e9]'}`} 
                           />
                         </div>
@@ -455,10 +508,7 @@ export function Hero({
                       </AnimatePresence>
                     </form>
 
-                    <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-[12px] font-bold text-[#0284c7]">
-                      <Link href="/services" className="hover:text-[#0369a1] flex items-center gap-1">All Services <span className="text-[9px]">▶</span></Link>
-                      <Link href="/contact" className="hover:text-[#0369a1] flex items-center gap-1">Contact Us <span className="text-[9px]">▶</span></Link>
-                    </div>
+
                     <p className="mt-4 text-[10px] leading-relaxed text-[#94a3b8]">
                       By submitting, you authorise LMB Insurance Brokers Pvt. Ltd. to contact you regarding your enquiry. Insurance is the subject matter of solicitation.
                     </p>

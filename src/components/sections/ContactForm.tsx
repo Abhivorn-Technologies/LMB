@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 const contactSchema = z.object({
@@ -12,7 +12,7 @@ const contactSchema = z.object({
   email: z.string()
     .email("A valid email address is required")
     .max(100, "Email is too long"),
-  phone: z.string().min(10, "A valid phone number is required").max(15, "Phone number is too long"),
+  phone: z.string().regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number starting with 6-9"),
   company: z.string().max(100, "Company name is too long").optional(),
   inquiry: z.string().min(1, "Please select an inquiry subject"),
   message: z.string().max(1000, "Message cannot exceed 1000 characters").optional(),
@@ -136,7 +136,7 @@ export function ContactForm() {
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="name" className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-700">
-                    Full Name <span className="text-[#115E59]">*</span>
+                    Full Name <span className="text-red-500">*</span>
                   </label>
                   <input 
                     id="name" 
@@ -154,7 +154,7 @@ export function ContactForm() {
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="email" className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-700">
-                    Email Address <span className="text-[#115E59]">*</span>
+                    Email Address <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="email"
@@ -173,15 +173,27 @@ export function ContactForm() {
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="phone" className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-700">
-                    Phone <span className="text-[#115E59]">*</span>
+                    Phone <span className="text-red-500">*</span>
                   </label>
-                  <input 
-                    id="phone" 
-                    placeholder="+91 ..." 
-                    maxLength={15}
-                    {...register("phone")} 
-                    className={`flex h-12 w-full rounded-xl border bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors ${errors.phone ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
-                  />
+                  <div className={`flex items-center h-12 w-full rounded-xl border bg-slate-50 overflow-hidden focus-within:ring-2 focus-within:ring-[#115E59]/30 transition-colors ${errors.phone ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus-within:border-[#115E59]'}`}>
+                    <div className="px-4 text-slate-500 font-medium border-r border-slate-200 shrink-0 text-sm h-full flex items-center">
+                      +91
+                    </div>
+                    <input 
+                      id="phone" 
+                      placeholder="Enter mobile number" 
+                      maxLength={10}
+                      {...register("phone")}
+                      onInput={(e) => { 
+                        let val = e.currentTarget.value.replace(/\D/g, '');
+                        if (val.length > 0 && !/^[6-9]/.test(val[0])) {
+                          val = val.replace(/^[^6-9]+/, '');
+                        }
+                        e.currentTarget.value = val.substring(0,10); 
+                      }}
+                      className="w-full h-full bg-transparent px-4 text-slate-900 focus:outline-none text-sm placeholder:text-slate-400"
+                    />
+                  </div>
                   {errors.phone && (
                     <p className="text-xs font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={12}/> {errors.phone.message}</p>
                   )}
@@ -195,6 +207,9 @@ export function ContactForm() {
                     placeholder="Company name" 
                     maxLength={100}
                     {...register("company")} 
+                    onInput={(e) => { 
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\p{N}\s\-'.&]/gu, ''); 
+                    }}
                     className="flex h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#115E59] focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors"
                   />
                 </div>
@@ -202,23 +217,26 @@ export function ContactForm() {
 
               <div className="space-y-2">
                 <label htmlFor="inquiry" className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-700">
-                  Subject <span className="text-[#115E59]">*</span>
+                  Subject <span className="text-red-500">*</span>
                 </label>
-                <select 
-                  id="inquiry" 
-                  defaultValue="" 
-                  {...register("inquiry")}
-                  className={`flex h-12 w-full rounded-xl border bg-slate-50 px-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors ${errors.inquiry ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
-                >
-                  <option value="" disabled>
-                    How can we help you today?
-                  </option>
-                  {inquiryOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
+                <div className="relative">
+                  <select 
+                    id="inquiry" 
+                    defaultValue="" 
+                    {...register("inquiry")}
+                    className={`peer appearance-none flex h-12 w-full rounded-xl border bg-slate-50 px-4 pr-10 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#115E59]/30 transition-colors ${errors.inquiry ? 'border-red-300 bg-red-50/50' : 'border-slate-200 focus:border-[#115E59]'}`}
+                  >
+                    <option value="" disabled>
+                      How can we help you today?
                     </option>
-                  ))}
-                </select>
+                    {inquiryOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none transition-transform peer-focus:-rotate-180 duration-300" />
+                </div>
                 {errors.inquiry && (
                   <p className="text-xs font-medium text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={12}/> {errors.inquiry.message}</p>
                 )}
@@ -252,7 +270,7 @@ export function ContactForm() {
                     Sending Inquiry...
                   </>
                 ) : (
-                  "Submit Inquiry"
+                  "Send Message"
                 )}
               </Button>
             </form>

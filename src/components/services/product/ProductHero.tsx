@@ -25,6 +25,10 @@ const formSchema = z.object({
     .regex(/^[\p{L}\s\-'.]+$/u, "Invalid characters in name")
     .refine(val => val.trim().length >= 2, "Name cannot be just spaces")
     .refine(val => !/^\d+$/.test(val), "Name cannot be only numbers"),
+  email: z.string()
+    .min(1, "Email Address is required")
+    .email("Enter a valid email address")
+    .max(100, "Maximum 100 characters allowed"),
   mobile: z.string()
     .min(1, "Mobile Number is required")
     .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")
@@ -58,7 +62,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
-    defaultValues: { name: "", mobile: "", address: "" }
+    defaultValues: { name: "", email: "", mobile: "", address: "" }
   });
 
   const isVehicle = title.toLowerCase().includes('car') || title.toLowerCase().includes('two wheeler') || title.toLowerCase().includes('motor');
@@ -72,6 +76,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
     console.log("Phone Number:", data.mobile);
     console.log("Other Details:", {
       name: data.name,
+      email: data.email,
       address: data.address || "Not provided",
       product: title,
     });
@@ -90,6 +95,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           from_name: "LMB Website Portal",
           "Insurance Product": title,
           "Name": data.name,
+          "Email Address": data.email,
           "Mobile Number": data.mobile,
           "Address": data.address || "Not provided",
         }),
@@ -102,7 +108,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         reset();
         
         // Open WhatsApp
-        const whatsappMsg = `Hello LMB, I would like to request a callback.\nName: ${data.name}\nMobile: ${data.mobile}\nAddress: ${data.address || "Not provided"}\nProduct: ${title}`;
+        const whatsappMsg = `Hello LMB, I would like to request a callback.\nName: ${data.name}\nEmail: ${data.email}\nMobile: ${data.mobile}\nAddress: ${data.address || "Not provided"}\nProduct: ${title}`;
         const whatsappUrl = `https://wa.me/919347067788?text=${encodeURIComponent(whatsappMsg)}`;
         window.open(whatsappUrl, '_blank');
       } else {
@@ -202,7 +208,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col mx-auto max-w-md border border-slate-100">
                 
                 {/* Clean Header */}
-                <div className="w-full px-8 pt-8 pb-6 flex items-center gap-4 relative">
+                <div className="w-full px-6 pt-6 pb-4 flex items-center gap-4 relative">
                    <div className="w-12 h-12 rounded-[14px] bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
                      <CategoryIcon className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
                    </div>
@@ -213,7 +219,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                 </div>
 
                 {/* Form Content */}
-                <div className="px-8 pb-8 relative">
+                <div className="px-6 pb-6 relative">
                   <AnimatePresence mode="wait">
                     {status === "success" ? (
                       <motion.div 
@@ -229,7 +235,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         </div>
                         <h4 className="text-[22px] font-bold text-[#0F172A] mb-3">Request Successful</h4>
                         <p className="text-slate-500 mb-8 text-[15px] leading-relaxed max-w-[280px]">
-                          Thank you for your interest. An LMB representative will contact you shortly with the best rates.
+                          Thank you for your interest. An LMB representative will contact you shortly to discuss your requirements.
                         </p>
                         <div className="w-full">
                           <Button 
@@ -237,7 +243,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                             variant="outline" 
                             className="w-full py-6 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-semibold uppercase tracking-widest text-[13px] shadow-sm bg-white transition-colors"
                           >
-                            Start New Quote
+                            Start New Inquiry
                           </Button>
                         </div>
                       </motion.div>
@@ -259,8 +265,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         )}
 
                         {/* Professional Input: Name */}
-                        <div className="mb-5 mt-1">
-                          <label className="block text-[14px] font-semibold text-slate-700 mb-2">
+                        <div className="mb-3 mt-0">
+                          <label className="block text-[12px] font-semibold text-slate-700 mb-1.5">
                             Full Name <span className="text-red-500">*</span>
                           </label>
                           <input 
@@ -271,7 +277,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                             onInput={(e) => { 
                               e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\s\-'.]/gu, ''); 
                             }}
-                            className={`w-full bg-white border ${errors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-50'} rounded-xl px-4 h-[50px] text-slate-900 focus:outline-none focus:ring-4 transition-all text-[15px] placeholder:text-slate-400`}
+                            className={`w-full bg-white border ${errors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-50'} rounded-xl px-4 h-[42px] text-slate-900 focus:outline-none focus:ring-4 transition-all text-[14px] placeholder:text-slate-400`}
                           />
                           <AnimatePresence>
                             {errors.name && (
@@ -286,14 +292,40 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                             )}
                           </AnimatePresence>
                         </div>
+
+                        {/* Professional Input: Email */}
+                        <div className="mb-3">
+                          <label className="block text-[12px] font-semibold text-slate-700 mb-1.5">
+                            Email Address <span className="text-red-500">*</span>
+                          </label>
+                          <input 
+                            type="email" 
+                            placeholder="e.g. you@example.com"
+                            maxLength={100}
+                            {...register("email")}
+                            className={`w-full bg-white border ${errors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-50'} rounded-xl px-4 h-[42px] text-slate-900 focus:outline-none focus:ring-4 transition-all text-[14px] placeholder:text-slate-400`}
+                          />
+                          <AnimatePresence>
+                            {errors.email && (
+                              <motion.span 
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="text-[13px] text-red-500 mt-2 block"
+                              >
+                                {errors.email.message}
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </div>
                         
                         {/* Professional Input: Mobile */}
-                        <div className="mb-5">
-                          <label className="block text-[14px] font-semibold text-slate-700 mb-2">
+                        <div className="mb-3">
+                          <label className="block text-[12px] font-semibold text-slate-700 mb-1.5">
                             Mobile Number <span className="text-red-500">*</span>
                           </label>
-                          <div className={`flex items-center h-[50px] border ${errors.mobile ? 'border-red-400 focus-within:ring-red-100' : 'border-slate-200 focus-within:border-blue-500 focus-within:ring-blue-50'} rounded-xl bg-white overflow-hidden focus-within:ring-4 transition-all`}>
-                            <div className="px-4 text-slate-500 font-medium border-r border-slate-200 shrink-0 text-[15px] h-full flex items-center bg-slate-50/50">
+                          <div className={`flex items-center h-[42px] border ${errors.mobile ? 'border-red-400 focus-within:ring-red-100' : 'border-slate-200 focus-within:border-blue-500 focus-within:ring-blue-50'} rounded-xl bg-white overflow-hidden focus-within:ring-4 transition-all`}>
+                            <div className="px-3 text-slate-500 font-medium border-r border-slate-200 shrink-0 text-[14px] h-full flex items-center bg-slate-50/50">
                               +91
                             </div>
                             <input 
@@ -308,7 +340,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                                 }
                                 e.currentTarget.value = val.substring(0,10); 
                               }}
-                              className="w-full h-full bg-transparent px-4 text-slate-900 focus:outline-none text-[15px] placeholder:text-slate-400"
+                              className="w-full h-full bg-transparent px-3 text-slate-900 focus:outline-none text-[14px] placeholder:text-slate-400"
                             />
                           </div>
                           <AnimatePresence>
@@ -326,8 +358,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         </div>
                         
                         {/* Professional Input: Address */}
-                        <div className="mb-8">
-                          <label className="block text-[14px] font-semibold text-slate-700 mb-2">
+                        <div className="mb-5">
+                          <label className="block text-[12px] font-semibold text-slate-700 mb-1.5">
                             Address <span className="text-slate-400 font-normal">(Optional)</span>
                           </label>
                           <input 
@@ -335,7 +367,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                             placeholder="Enter your address"
                             maxLength={255}
                             {...register("address")}
-                            className={`w-full bg-white border ${errors.address ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-50'} rounded-xl px-4 h-[50px] text-slate-900 focus:outline-none focus:ring-4 transition-all text-[15px] placeholder:text-slate-400`}
+                            className={`w-full bg-white border ${errors.address ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-50'} rounded-xl px-4 h-[42px] text-slate-900 focus:outline-none focus:ring-4 transition-all text-[14px] placeholder:text-slate-400`}
                           />
                           <AnimatePresence>
                             {errors.address && (
@@ -355,10 +387,10 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         <Button 
                           type="submit" 
                           disabled={status === "loading"}
-                          className="w-full py-6 text-[15px] uppercase tracking-wider font-bold rounded-xl bg-[#FFB800] hover:bg-[#F39C12] text-slate-900 border-none transition-colors flex items-center justify-center mt-2"
+                          className="w-full h-[48px] text-[14px] uppercase tracking-wider font-bold rounded-xl bg-[#FFB800] hover:bg-[#F39C12] text-slate-900 border-none transition-colors flex items-center justify-center mt-1 shadow-sm"
                         >
                           {status === "loading" ? (
-                            <><Icons.Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
+                            <><Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                           ) : (
                             "Request Callback"
                           )}
