@@ -66,6 +66,17 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   const onSubmit = async (data: FormData) => {
     setStatus("loading");
     
+    // Log the details being sent and their destination
+    console.log("=== SENDING FORM DETAILS ===");
+    console.log("Destination Email:", "narasimharao@lmbib.com (configured in Web3Forms)");
+    console.log("Phone Number:", data.mobile);
+    console.log("Other Details:", {
+      name: data.name,
+      address: data.address || "Not provided",
+      product: title,
+    });
+    console.log("============================");
+    
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
@@ -188,43 +199,47 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
               className="lg:col-span-5 relative w-full mt-8 lg:mt-0"
             >
-              <div className="bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col mx-auto max-w-md border border-slate-200">
+              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col mx-auto max-w-md border border-slate-100">
                 
                 {/* Clean Header */}
-                <div className="w-full px-8 pt-8 pb-4 bg-white flex items-center gap-4 relative">
-                   <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-200 shadow-sm shrink-0">
-                     <CategoryIcon className="w-6 h-6 text-[#0F172A]" strokeWidth={2} />
+                <div className="w-full px-8 pt-8 pb-6 flex items-center gap-4 relative">
+                   <div className="w-12 h-12 rounded-[14px] bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
+                     <CategoryIcon className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
                    </div>
                    <div>
-                     <h3 className="text-[20px] font-extrabold text-[#0F172A] tracking-tight">Request Callback</h3>
-                     <p className="text-slate-500 text-[13px] font-medium mt-0.5">We'll call you back shortly</p>
+                     <h3 className="text-xl font-bold text-[#0F172A] tracking-tight">Request Callback</h3>
+                     <p className="text-slate-500 text-[14px] mt-0.5">We'll call you back shortly</p>
                    </div>
                 </div>
 
                 {/* Form Content */}
-                <div className="px-8 pb-8 bg-white relative">
+                <div className="px-8 pb-8 relative">
                   <AnimatePresence mode="wait">
                     {status === "success" ? (
                       <motion.div 
                         key="success"
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
                         className="flex flex-col items-center justify-center text-center py-6"
                       >
-                        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-5 text-emerald-600 border border-emerald-100">
-                          <Icons.CheckCircle2 className="w-8 h-8" />
+                        <div className="w-16 h-16 bg-[#F0FDF4] rounded-full flex items-center justify-center mb-6">
+                          <Icons.Check className="w-8 h-8 text-[#10B981]" strokeWidth={3} />
                         </div>
-                        <h4 className="text-[22px] font-extrabold text-[#0F172A] mb-2">Request Successful</h4>
-                        <p className="text-slate-600 mb-8 text-[15px] leading-relaxed font-medium">
+                        <h4 className="text-[22px] font-bold text-[#0F172A] mb-3">Request Successful</h4>
+                        <p className="text-slate-500 mb-8 text-[15px] leading-relaxed max-w-[280px]">
                           Thank you for your interest. An LMB representative will contact you shortly with the best rates.
                         </p>
-                        <Button 
-                          onClick={() => setStatus("idle")}
-                          variant="outline" 
-                          className="w-full py-4 rounded-xl border-slate-300 text-slate-700 hover:bg-slate-50 font-bold uppercase tracking-wider text-sm"
-                        >
-                          Start New Quote
-                        </Button>
+                        <div className="w-full">
+                          <Button 
+                            onClick={() => setStatus("idle")}
+                            variant="outline" 
+                            className="w-full py-6 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-semibold uppercase tracking-widest text-[13px] shadow-sm bg-white transition-colors"
+                          >
+                            Start New Quote
+                          </Button>
+                        </div>
                       </motion.div>
                     ) : (
                       <motion.form 
@@ -232,19 +247,20 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
                         onSubmit={handleSubmit(onSubmit)}
                         className="flex flex-col"
                         noValidate
                       >
                         {status === "error" && (
-                          <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-[13px] font-bold mb-5 border border-red-100">
-                            <Icons.AlertCircle size={16} /> An error occurred. Please try again.
+                          <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-[14px] font-medium mb-6">
+                            <Icons.AlertCircle size={18} /> An error occurred. Please try again.
                           </div>
                         )}
 
-                        {/* Standard Input: Name */}
-                        <div className="mb-5 mt-2">
-                          <label className="block text-[12px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">
+                        {/* Professional Input: Name */}
+                        <div className="mb-5 mt-1">
+                          <label className="block text-[14px] font-semibold text-slate-700 mb-2">
                             Full Name <span className="text-red-500">*</span>
                           </label>
                           <input 
@@ -255,20 +271,29 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                             onInput={(e) => { 
                               e.currentTarget.value = e.currentTarget.value.replace(/[^\p{L}\s\-'.]/gu, ''); 
                             }}
-                            className={`w-full bg-slate-50 border ${errors.name ? 'border-red-400' : 'border-slate-200'} rounded-xl px-4 h-[46px] text-[#0F172A] focus:outline-none focus:border-blue-600 focus:bg-white transition-all font-bold placeholder:font-medium placeholder:text-slate-400 text-[15px]`}
+                            className={`w-full bg-white border ${errors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-50'} rounded-xl px-4 h-[50px] text-slate-900 focus:outline-none focus:ring-4 transition-all text-[15px] placeholder:text-slate-400`}
                           />
-                          {errors.name && (
-                            <span className="text-[12px] font-bold text-red-500 mt-1.5 block flex items-center gap-1"><Icons.Info size={14}/> {errors.name.message}</span>
-                          )}
+                          <AnimatePresence>
+                            {errors.name && (
+                              <motion.span 
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="text-[13px] text-red-500 mt-2 block"
+                              >
+                                {errors.name.message}
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
                         </div>
                         
-                        {/* Standard Input: Mobile */}
-                        <div className="mb-6">
-                          <label className="block text-[12px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">
+                        {/* Professional Input: Mobile */}
+                        <div className="mb-5">
+                          <label className="block text-[14px] font-semibold text-slate-700 mb-2">
                             Mobile Number <span className="text-red-500">*</span>
                           </label>
-                          <div className={`flex items-center h-[46px] border ${errors.mobile ? 'border-red-400' : 'border-slate-200'} rounded-xl bg-slate-50 overflow-hidden focus-within:border-blue-600 focus-within:bg-white transition-all`}>
-                            <div className="px-4 text-slate-500 font-bold border-r border-slate-200 shrink-0 text-[15px] h-full flex items-center">
+                          <div className={`flex items-center h-[50px] border ${errors.mobile ? 'border-red-400 focus-within:ring-red-100' : 'border-slate-200 focus-within:border-blue-500 focus-within:ring-blue-50'} rounded-xl bg-white overflow-hidden focus-within:ring-4 transition-all`}>
+                            <div className="px-4 text-slate-500 font-medium border-r border-slate-200 shrink-0 text-[15px] h-full flex items-center bg-slate-50/50">
                               +91
                             </div>
                             <input 
@@ -283,39 +308,57 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                                 }
                                 e.currentTarget.value = val.substring(0,10); 
                               }}
-                              className="w-full h-full bg-transparent px-4 text-[#0F172A] focus:outline-none font-bold placeholder:font-medium placeholder:text-slate-400 text-[15px]"
+                              className="w-full h-full bg-transparent px-4 text-slate-900 focus:outline-none text-[15px] placeholder:text-slate-400"
                             />
                           </div>
-                          {errors.mobile && (
-                            <span className="text-[12px] font-bold text-red-500 mt-1.5 block flex items-center gap-1"><Icons.Info size={14}/> {errors.mobile.message}</span>
-                          )}
+                          <AnimatePresence>
+                            {errors.mobile && (
+                              <motion.span 
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="text-[13px] text-red-500 mt-2 block"
+                              >
+                                {errors.mobile.message}
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
                         </div>
                         
-                        {/* Standard Input: Address */}
-                        <div className="mb-6">
-                          <label className="block text-[12px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">
-                            Address <span className="text-slate-400 font-medium normal-case">(Optional)</span>
+                        {/* Professional Input: Address */}
+                        <div className="mb-8">
+                          <label className="block text-[14px] font-semibold text-slate-700 mb-2">
+                            Address <span className="text-slate-400 font-normal">(Optional)</span>
                           </label>
                           <input 
                             type="text" 
                             placeholder="Enter your address"
                             maxLength={255}
                             {...register("address")}
-                            className={`w-full bg-slate-50 border ${errors.address ? 'border-red-400' : 'border-slate-200'} rounded-xl px-4 h-[46px] text-[#0F172A] focus:outline-none focus:border-blue-600 focus:bg-white transition-all font-bold placeholder:font-medium placeholder:text-slate-400 text-[15px]`}
+                            className={`w-full bg-white border ${errors.address ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-50'} rounded-xl px-4 h-[50px] text-slate-900 focus:outline-none focus:ring-4 transition-all text-[15px] placeholder:text-slate-400`}
                           />
-                          {errors.address && (
-                            <span className="text-[12px] font-bold text-red-500 mt-1.5 block flex items-center gap-1"><Icons.Info size={14}/> {errors.address.message}</span>
-                          )}
+                          <AnimatePresence>
+                            {errors.address && (
+                              <motion.span 
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="text-[13px] text-red-500 mt-2 block"
+                              >
+                                {errors.address.message}
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
                         </div>
                         
                         {/* Submit Button */}
                         <Button 
                           type="submit" 
                           disabled={status === "loading"}
-                          className="w-full py-4 text-[14px] uppercase tracking-widest font-extrabold rounded-xl bg-[#ffb800] hover:bg-[#F39C12] text-slate-900 border-none transition-colors flex items-center justify-center mt-2 shadow-sm"
+                          className="w-full py-6 text-[15px] uppercase tracking-wider font-bold rounded-xl bg-[#FFB800] hover:bg-[#F39C12] text-slate-900 border-none transition-colors flex items-center justify-center mt-2"
                         >
                           {status === "loading" ? (
-                            <><Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                            <><Icons.Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</>
                           ) : (
                             "Request Callback"
                           )}
